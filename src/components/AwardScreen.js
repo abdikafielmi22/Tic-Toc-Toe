@@ -17,7 +17,7 @@ const AwardScreen = ({ winner, onPlayAgain }) => {
       /> {/* Displaying the winner's image */}
       <div className="flex justify-center space-x-4 mb-4"> {/* Container for stars with spacing */}
         {[...Array(3)].map((_, i) => (
-          <FaStar key={i} className="text-yellow-500 text-4xl animate-spin-slow" /> {/* Spinning star icons */}
+          <FaStar key={i} className="text-yellow-500 text-4xl animate-spin-slow" /> 
         ))}
       </div>
       <button
