@@ -1,3 +1,4 @@
+// src/components/Game.js
 import React, { useState } from 'react';
 import Board from './Board';
 import AwardScreen from './AwardScreen';
@@ -115,13 +116,73 @@ const getEasyMove = (newBoard) => {
 };
 
 const getMediumMove = (newBoard) => {
-  // Implement a mix of random and strategic moves for medium difficulty
-  return getEasyMove(newBoard); // Placeholder implementation
+  const emptyIndices = newBoard.map((val, index) => val === null ? index : null).filter(val => val !== null);
+  // Check if AI can win
+  for (let i = 0; i < emptyIndices.length; i++) {
+    const testBoard = [...newBoard];
+    testBoard[emptyIndices[i]] = 'O';
+    if (calculateWinner(testBoard) === 'O') {
+      return emptyIndices[i];
+    }
+  }
+  // Block opponent's winning move
+  for (let i = 0; i < emptyIndices.length; i++) {
+    const testBoard = [...newBoard];
+    testBoard[emptyIndices[i]] = 'X';
+    if (calculateWinner(testBoard) === 'X') {
+      return emptyIndices[i];
+    }
+  }
+  // Otherwise, return a random move
+  return getEasyMove(newBoard);
 };
 
 const getHardMove = (newBoard) => {
-  // Implement the Minimax algorithm or another advanced strategy
-  return getEasyMove(newBoard); // Placeholder implementation
+  const minimax = (board, depth, isMaximizing) => {
+    const winner = calculateWinner(board);
+    if (winner === 'O') return 10 - depth;
+    if (winner === 'X') return depth - 10;
+    if (board.every(cell => cell)) return 0;
+
+    if (isMaximizing) {
+      let maxEval = -Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === null) {
+          board[i] = 'O';
+          const eval = minimax(board, depth + 1, false);
+          board[i] = null;
+          maxEval = Math.max(maxEval, eval);
+        }
+      }
+      return maxEval;
+    } else {
+      let minEval = Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === null) {
+          board[i] = 'X';
+          const eval = minimax(board, depth + 1, true);
+          board[i] = null;
+          minEval = Math.min(minEval, eval);
+        }
+      }
+      return minEval;
+    }
+  };
+
+  let bestMove = null;
+  let bestValue = -Infinity;
+  for (let i = 0; i < newBoard.length; i++) {
+    if (newBoard[i] === null) {
+      newBoard[i] = 'O';
+      const moveValue = minimax(newBoard, 0, false);
+      newBoard[i] = null;
+      if (moveValue > bestValue) {
+        bestMove = i;
+        bestValue = moveValue;
+      }
+    }
+  }
+  return bestMove;
 };
 
 export default Game;
