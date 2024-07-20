@@ -1,28 +1,37 @@
-// src/App.js
+// Import necessary modules and components from React and other libraries
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './components/Home';
-import Game from './components/Game';
-import About from './components/About';
-import NavBar from './components/NavBar';
-import Login from './components/Login';
-import { auth } from './firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Import Router, Route, and Routes for navigation
+import { AuthProvider } from './components/AuthProvider'; // Import AuthProvider component for authentication context
+import Login from './components/Login'; // Import Login component
+import Home from './components/Home'; // Import Home component
+import Game from './components/Game'; // Import Game component
+import Settings from './components/Settings'; // Import Settings component
+import { SettingsProvider } from './components/settinContext/SettingsContext'; // Import SettingsProvider for settings context
+import About from './components/About'; // Import About component
 
-const App = () => {
-  const [user] = useAuthState(auth);
-
+// Define the main App component
+function App() {
   return (
-    <Router>
-      {user ? <NavBar /> : null}
-      <Routes>
-        <Route path="/" element={user ? <Home /> : <Navigate to="/login" />} />
-        <Route path="/game" element={user ? <Game /> : <Navigate to="/login" />} />
-        <Route path="/about" element={user ? <About /> : <Navigate to="/login" />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </Router>
+    // Wrap the application with AuthProvider for authentication context
+    <AuthProvider>
+      // Wrap the application with SettingsProvider for settings context
+      <SettingsProvider>
+        // Define the Router for navigation
+        <Router>
+          // Define the Routes for different paths
+          <Routes>
+            <Route path="/login" element={<Login />} /> // Route for Login component
+            <Route path="/home" element={<Home />} /> // Route for Home component
+            <Route path="/game" element={<Game />} /> // Route for Game component
+            <Route path="/settings" element={<Settings />} /> // Route for Settings component
+            <Route path="/about" element={<About />} /> // Route for About component
+            <Route path="/" element={<Home />} /> // Default route for Home component
+          </Routes>
+        </Router>
+      </SettingsProvider>
+    </AuthProvider>
   );
-};
+}
 
+// Export the App component as the default export
 export default App;
