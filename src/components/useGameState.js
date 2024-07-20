@@ -1,64 +1,47 @@
-import { useState } from 'react';
+// Import necessary hooks and functions from React and other modules
+import { useState, useEffect } from 'react';
+import { calculateWinner } from './calculateWinner'; // Import the calculateWinner function
 
+// Define a custom hook for managing game state
 export const useGameState = () => {
-  const [board, setBoard] = useState(Array(9).fill(null));
-  const [isXNext, setIsXNext] = useState(true);
-  const [gameOver, setGameOver] = useState(false);
-  const [winner, setWinner] = useState(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const [board, setBoard] = useState(Array(9).fill(null)); // State for the game board
+  const [gameOver, setGameOver] = useState(false); // State to track if the game is over
+  const [winner, setWinner] = useState(null); // State to store the winner
 
+  // Function to reset the game state
   const resetGame = () => {
-    setBoard(Array(9).fill(null));
-    setIsXNext(true);
-    setGameOver(false);
-    setWinner(null);
-    setIsPaused(false);
+    setBoard(Array(9).fill(null)); // Reset the board to its initial state
+    setGameOver(false); // Reset game over state
+    setWinner(null); // Reset winner state
   };
 
-  const calculateWinner = (squares) => {
-    const lines = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8],
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],
-      [0, 4, 8], [2, 4, 6]
-    ];
-    for (let [a, b, c] of lines) {
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
-      }
-    }
-    return null;
-  };
+  // useEffect hook to reset the game on component mount
+  useEffect(() => {
+    resetGame();
+  }, []);
 
-  const handleClick = (index, gameMode, aiMove) => {
-    if (board[index] || gameOver || (gameMode === 'ai' && !isXNext)) return;
-
-    const newBoard = [...board];
-    newBoard[index] = isXNext ? 'X' : 'O';
-    setBoard(newBoard);
-    setIsXNext(!isXNext);
-
-    const gameWinner = calculateWinner(newBoard);
-    if (gameWinner || newBoard.every(cell => cell !== null)) {
-      setGameOver(true);
-      setWinner(gameWinner);
-    } else if (gameMode === 'ai' && !isXNext) {
-      aiMove(newBoard);
+  // Function to handle a click on the game board
+  const handleClick = (index) => {
+    if (board[index] || gameOver) return; // Ignore clicks on filled squares or if the game is over
+    const newBoard = board.slice(); // Create a copy of the current board
+    const randomSymbol = Math.random() < 0.5 ? 'X' : 'O'; // Randomly choose 'X' or 'O'
+    newBoard[index] = randomSymbol; // Update the board at the clicked index
+    setBoard(newBoard); // Set the new board state
+    const winner = calculateWinner(newBoard); // Check if there is a winner
+    if (winner) {
+      setWinner(winner); // Set the winner state
+      setGameOver(true); // Set game over state
+    } else if (newBoard.every((square) => square)) {
+      setGameOver(true); // Set game over state if the board is full
     }
   };
 
+  // Return the game state and functions
   return {
     board,
-    isXNext,
     gameOver,
     winner,
-    isPaused,
     handleClick,
     resetGame,
-    setBoard,
-    setIsXNext,
-    setGameOver,
-    setWinner,
-    setIsPaused,
-    calculateWinner,
   };
 };
