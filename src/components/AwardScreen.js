@@ -1,30 +1,29 @@
 import React from 'react';
-import { FaTrophy, FaStar } from 'react-icons/fa';
+import Confetti from 'react-confetti';
 
 const AwardScreen = ({ winner, onPlayAgain }) => {
   return (
-    <div className="text-center">
-      <div className="animate-bounce">
-        <FaTrophy className="text-yellow-500 text-6xl mx-auto mb-4" />
+    <div className="relative flex flex-col items-center justify-center h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
+      {/* Confetti Animation */}
+      <Confetti width={window.innerWidth} height={window.innerHeight} />
+
+      <div className="animate-bounce text-center p-8 bg-white bg-opacity-50 rounded-lg shadow-xl">
+        <h2 className="text-5xl font-extrabold text-purple-700 mb-4">🎉 Congratulations {winner}! 🎉</h2>
+        <p className="text-lg text-purple-700 mb-8">You've won the game!</p>
+        <button
+          className="px-6 py-3 bg-green-500 hover:bg-green-700 text-white rounded-full text-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
+          onClick={onPlayAgain}
+        >
+          Play Again
+        </button>
       </div>
-      <h1 className="text-4xl font-bold mb-4 animate-pulse">Congratulations!</h1>
-      <p className="text-2xl mb-4">Winner: {winner}</p>
-      <img 
-        src={require(`./Assets/${winner.toLowerCase()}.png`)} 
-        alt={winner} 
-        className="mx-auto mb-4 w-32 h-32" 
-      />
-      <div className="flex justify-center space-x-4 mb-4">
-        {[...Array(3)].map((_, i) => (
-          <FaStar key={i} className="text-yellow-500 text-4xl animate-spin-slow" />
-        ))}
+
+      {/* Decorative Elements */}
+      <div className="absolute bottom-0 left-0 right-0 flex justify-center mb-10 space-x-4">
+        <div className="w-16 h-16 bg-white rounded-full shadow-md animate-spin-slow"></div>
+        <div className="w-16 h-16 bg-white rounded-full shadow-md animate-spin-slow"></div>
+        <div className="w-16 h-16 bg-white rounded-full shadow-md animate-spin-slow"></div>
       </div>
-      <button
-        onClick={onPlayAgain}
-        className="w-full mt-4 bg-green-500 text-white py-2 rounded"
-      >
-        Play Again
-      </button>
     </div>
   );
 };
