@@ -1,101 +1,104 @@
-import React, { useState, useEffect } from 'react';
-import Board from './Board';
-import AwardScreen from './AwardScreen';
-import { useGameState } from './useGameState';
-import { useAIMove } from './useAIMove';
+import React, { useState, useEffect } from 'react'; // Import necessary hooks from React
+import { useGameState } from './useGameState'; // Import custom hook for game state management
+import Board from './Board'; // Import Board component to display the game board
+import AwardScreen from './AwardScreen'; // Import AwardScreen component to display the winner
 
 const Game = () => {
+  // State to manage the player's symbol (X or O)
+  const [playerSymbol, setPlayerSymbol] = useState('X');
+  // State to manage player names
+  const [playerNames, setPlayerNames] = useState({ player1: 'Player 1', player2: 'Player 2' });
+  // State to manage the current player
+  const [currentPlayer, setCurrentPlayer] = useState('player1');
+
+  // Destructure necessary state and functions from useGameState hook
   const {
-    board,
-    isXNext,
-    gameOver,
-    winner,
-    isPaused,
-    handleClick,
-    resetGame,
-    setBoard,
-    setIsXNext,
-    setGameOver,
-    setWinner,
-    setIsPaused,
-    calculateWinner,
+    board,       // Current state of the game board
+    gameOver,    // Boolean indicating if the game is over
+    winner,      // Winner of the game
+    handleClick, // Function to handle a square click
+    resetGame,   // Function to reset the game
   } = useGameState();
 
-  const [difficulty, setDifficulty] = useState('easy');
-  const [gameMode, setGameMode] = useState(null);
-
-  const { makeAIMove } = useAIMove(difficulty);
-
+  // useEffect hook to reset the game when the component mounts
   useEffect(() => {
-    if (gameMode === 'ai' && !isXNext && !gameOver) {
-      makeAIMove(board, calculateWinner, setBoard, setIsXNext, setGameOver, setWinner);
-    }
-  }, [board, isXNext, gameMode, gameOver, makeAIMove, calculateWinner, setBoard, setIsXNext, setGameOver, setWinner]);
-
-  const handleClickWrapper = (index) => {
-    if (gameMode === 'ai' && !isXNext) return;
-    handleClick(index, gameMode, (newBoard) => makeAIMove(newBoard, calculateWinner, setBoard, setIsXNext, setGameOver, setWinner));
-  };
-
-  const handleGameModeChange = (mode) => {
-    setGameMode(mode);
     resetGame();
+  }, [resetGame]);
+
+  // Function to handle changes in player names
+  const handlePlayerNameChange = (player, name) => {
+    setPlayerNames((prevNames) => ({
+      ...prevNames,
+      [player]: name,
+    }));
   };
 
-  const handleResume = () => {
-    if (gameMode === 'ai' && !isXNext) {
-      makeAIMove(board, calculateWinner, setBoard, setIsXNext, setGameOver, setWinner);
+  // Function to handle square clicks
+  const handleSquareClick = (index) => {
+    if (handleClick(index)) {
+      setCurrentPlayer(currentPlayer === 'player1' ? 'player2' : 'player1'); // Switch the current player
     }
-    setIsPaused(false);
   };
 
-  const status = winner ? `Winner: ${winner}` : gameOver ? 'Draw!' : `Next player: ${isXNext ? 'X' : 'O'}`;
+  // Determine the status message based on the game state
+  const status = winner
+    ? `Winner: ${winner === 'X' ? playerNames.player1 : playerNames.player2}`
+    : gameOver
+    ? 'Restart!'
+    : `Next player: ${currentPlayer === 'player1' ? playerNames.player1 : playerNames.player2}`;
 
   return (
-    <div className="bg-gray-100 flex justify-center items-center h-screen">
-      <div className="bg-white border-2 border-gray-400 p-6 rounded-lg shadow-lg">
-        {winner ? (
-          <AwardScreen winner={winner} onPlayAgain={resetGame} />
-        ) : (
-          <>
-            {!gameMode ? (
-              <div className="text-center">
-                <h1 className="text-2xl font-bold mb-4">Tic-Tac-Toe</h1>
-                <div className="flex justify-center space-x-4 mb-4">
-                  <button onClick={() => handleGameModeChange('ai')} className="bg-blue-500 text-white py-2 px-4 rounded">
-                    Play vs AI
-                  </button>
-                  <button onClick={() => handleGameModeChange('player')} className="bg-green-500 text-white py-2 px-4 rounded">
-                    Play vs Player
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="flex justify-between mb-4">
-                  {gameMode === 'ai' && (
-                    <label>
-                      Difficulty:
-                      <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="ml-2 p-1 border rounded">
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                      </select>
-                    </label>
-                  )}
-                </div>
-                <Board squares={board} onClick={handleClickWrapper} />
-                <div className="w-full text-center mb-4">
-                  <div className="text-lg font-bold">{status}</div>
-                </div>
-                <button onClick={isPaused ? handleResume : resetGame} className="w-full mt-4 bg-red-500 text-white py-2 rounded">
-                  {isPaused ? 'Resume' : 'Start New Game'}
-                </button>
-              </>
-            )}
-          </>
-        )}
-      </div>
+    <div className="game-container flex flex-col items-center p-6 bg-gradient-to-br from-blue-100 to-blue-300 min-h-screen">
+      {winner ? (
+        // Display AwardScreen component if there is a winner
+        <AwardScreen winner={winner === 'X' ? playerNames.player1 : playerNames.player2} onPlayAgain={resetGame} />
+      ) : (
+        // Display game interface if there is no winner yet
+        <>
+          <h1 className="text-4xl font-bold mb-8 text-blue-600">Tic-Tac-Toe</h1>
+          <div className="player-names mb-4">
+            <div className="mb-2">
+              <label className="block mb-2 text-blue-700 font-medium">
+                Player 1 Name:
+                <input
+                  type="text"
+                  value={playerNames.player1}
+                  onChange={(e) => handlePlayerNameChange('player1', e.target.value)}
+                  className="ml-2 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  placeholder="Enter your name"
+                />
+              </label>
+            </div>
+            <div className="mb-2">
+              <label className="block mb-2 text-blue-700 font-medium">
+                Player 2 Name:
+                <input
+                  type="text"
+                  value={playerNames.player2}
+                  onChange={(e) => handlePlayerNameChange('player2', e.target.value)}
+                  className="ml-2 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  placeholder="Enter your name"
+                />
+              </label>
+            </div>
+          </div>
+          <div className="game-board mb-4">
+            <Board squares={board} onClick={handleSquareClick} />
+          </div>
+          <div className="game-info mt-4">
+            <div className="status mb-2 text-lg font-bold text-blue-700">{status}</div>
+            <button
+              onClick={() => {
+                resetGame();
+                setCurrentPlayer('player1'); // Reset current player to player1
+              }}
+              className="mt-2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            >
+              Restart Game
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
