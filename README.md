@@ -67,4 +67,4 @@ Play the game:
 Enjoy playing Tic-Tac-Toe in real time.
 
 Online site of the game on firebase :
-link is here
+link is here https://tic-toc-toe-7c569.web.app
